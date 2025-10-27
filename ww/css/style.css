@@ -1,0 +1,54 @@
+body {
+
+    margin: 0;
+    padding: 0;
+
+}
+
+/* 🔹 ส่วนหัว (Header) */
+.header {
+    display: flex;
+    justify-content: space-between; /* ซ้าย-ขวา */
+    align-items: center;             /* จัดตรงกลางแนวตั้ง */
+    /*background-color: ; 
+    color: white; */
+    padding: 10px 20px;
+}
+
+.header h2 {
+    margin: 0;
+}
+
+.page-header {
+    border-bottom: 1px solid #000000;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    margin: 0 20px 20px; /* เว้นขอบซ้ายขวา 20px */
+}
+
+/* 🔹 ส่วนข้อมูลผู้ใช้ด้านขวา */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.logout-btn {
+    background: white;
+    color: #007bff;
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #0056b3;
+    color: white;
+}
+
+.space {
+    padding: 10px 20px;
+}
