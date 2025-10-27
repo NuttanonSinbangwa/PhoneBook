@@ -1,7 +1,15 @@
 <?php
 include 'db.php';
 session_start();
+
 $error = '';
+
+// ถ้า login อยู่แล้ว → ไปหน้า main
+if (isset($_SESSION['username'])) {
+    header("Location: main.php");
+    exit;
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -19,7 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->fetch();
 
             if (password_verify($password, $hashed)) {
-                // สำเร็จ
                 $_SESSION['username'] = $username;
                 $_SESSION['fullname'] = $fullname;
                 header("Location: main.php");
@@ -36,60 +43,46 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 ?>
 <!doctype html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <title>Home</title>
 </head>
-
 <body>
 
-    <script>
-        const usernameInput = document.getElementById('username');
-        const saveCheckbox = document.getElementById('saveUsername');
-        const form = document.getElementById('loginForm');
+<h2>Personal Phonebook Management Service</h2>
+<h3>SIGN IN</h3>
 
-        // ✅ โหลดชื่อที่เคยบันทึกไว้
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedUsername = localStorage.getItem('savedUsername');
-            if (savedUsername) {
-                usernameInput.value = savedUsername;
-                saveCheckbox.checked = true;
-            }
-        });
+<?php if ($error): ?>
+    <p style="color:red;"><?= htmlspecialchars($error) ?></p>
+<?php endif; ?>
 
-        // ✅ เมื่อกด Sign On
-        form.addEventListener('submit', () => {
-            if (saveCheckbox.checked) {
-                localStorage.setItem('savedUsername', usernameInput.value);
-            } else {
-                localStorage.removeItem('savedUsername');
-            }
-        });
-    </script>
+<form method="POST" id="loginForm">
+    <label>Username:</label>
+    <input name="username" id="username" required value="<?= htmlspecialchars($_COOKIE['savedUsername'] ?? '') ?>"><br><br>
 
+    <label>Password:</label>
+    <input type="password" name="password" required><br><br>
 
-    <h2>Personal Phonebook Management Service</h2>
-    <h3>SIGN IN</h3>
+    <input type="checkbox" id="saveUsername" <?= isset($_COOKIE['savedUsername']) ? 'checked' : '' ?>>
+    <label for="saveUsername">Save username in this machine</label><br><br>
 
-    <?php if ($error): ?>
-        <p style="color:red;"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+    <button type="submit">Sign On</button>
+</form>
 
-    <form method="POST">
-        <label>Username:</label>
-        <input name="username" required><br><br>
+<p><a href="register.php"><button type="button">New User</button></a></p>
 
-        <label>Password:</label>
-        <input type="password" name="password" required><br><br>
+<script>
+// ใช้ cookie แทน localStorage ง่ายขึ้น
+document.getElementById('loginForm').addEventListener('submit', function() {
+    const username = document.getElementById('username').value;
+    const save = document.getElementById('saveUsername').checked;
+    if (save) {
+        document.cookie = "savedUsername=" + encodeURIComponent(username) + "; path=/";
+    } else {
+        document.cookie = "savedUsername=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+});
+</script>
 
-        <input type="checkbox" id="saveUsername">
-        <label for="saveUsername">Save username in this machine</label><br><br>
-
-        <button type="submit">Sign On</button>
-    </form>
-
-    <p><a href="register.php"><button type="button">New User</button></a></p>
-    
 </body>
-
 </html>

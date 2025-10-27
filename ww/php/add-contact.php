@@ -4,20 +4,22 @@ session_start();
 $pageTitle = 'ADD NEW';
 $error = '';
 
+// ตรวจสอบ session
 if (!isset($_SESSION['username'])) {
     header("Location: index.php");
     exit;
 }
 
+// เมื่อ submit form
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fullname = trim($_POST['fullname'] ?? '');
     $relationships = trim($_POST['relationships'] ?? '');
     $tel = trim($_POST['tel'] ?? '');
 
-    if ($fullname === '' || $relationships === '' || $tel === '') {
+    if (!$fullname || !$relationships || !$tel) {
         $error = '⚠️ กรุณากรอกข้อมูลให้ครบทุกช่อง';
     } else {
-        // หาค่า user_id ของผู้ใช้ปัจจุบัน
+        // ดึง user_id ของผู้ใช้ปัจจุบัน
         $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
         $stmt->bind_param("s", $_SESSION['username']);
         $stmt->execute();
@@ -31,10 +33,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if ($insert->execute()) {
                 header("Location: main.php");
                 exit;
-            } else {
-                $error = '❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล';
             }
             $insert->close();
+            $error = '❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล';
         } else {
             $error = 'ไม่พบข้อมูลผู้ใช้ในระบบ';
         }
@@ -62,12 +63,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <label for="relationships">TYPE:</label>
             <select id="relationships" name="relationships" required>
-                <option value="" selected disabled hidden></option>
-                <option value="Family" <?= ($relationships ?? '') === 'Family' ? 'selected' : '' ?>>Family</option>
-                <option value="Friend" <?= ($relationships ?? '') === 'Friend' ? 'selected' : '' ?>>Friend</option>
-                <option value="Colleague" <?= ($relationships ?? '') === 'Colleague' ? 'selected' : '' ?>>Colleague</option>
-                <option value="Business" <?= ($relationships ?? '') === 'Business' ? 'selected' : '' ?>>Business</option>
-                <option value="Misc" <?= ($relationships ?? '') === 'Misc' ? 'selected' : '' ?>>Misc</option>
+                <option value="" disabled hidden <?= empty($relationships) ? 'selected' : '' ?>></option>
+                <?php
+                $types = ['Family','Friend','Colleague','Business','Misc'];
+                foreach ($types as $type):
+                ?>
+                    <option value="<?= $type ?>" <?= ($relationships ?? '') === $type ? 'selected' : '' ?>><?= $type ?></option>
+                <?php endforeach; ?>
             </select><br><br>
 
             <label>TEL:</label>
@@ -75,6 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <button type="submit">ADD</button>
         </form>
+
         <br>
         <a href="main.php"><button type="button">CANCEL</button></a>
     </div>
